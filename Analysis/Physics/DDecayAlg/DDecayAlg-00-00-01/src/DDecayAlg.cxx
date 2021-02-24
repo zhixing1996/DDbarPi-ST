@@ -69,6 +69,7 @@ StatusCode DDecay::initialize() {
             status = m_tuple1->addItem("chi2_vf", m_chi2_vf);
             status = m_tuple1->addItem("chi2_kf", m_chi2_kf);
             status = m_tuple1->addItem("n_count", m_n_count); // multi-counting D in one event
+            status = m_tuple1->addItem("matched_D", m_matched_D);
             status = m_tuple1->addItem("n_othertrks", m_n_othertrks, 0, 20);
             status = m_tuple1->addIndexedItem("rawp4_otherMdctrk", m_n_othertrks, 6, m_rawp4_otherMdctrk);
             status = m_tuple1->addIndexedItem("rawp4_otherMdcKaltrk", m_n_othertrks, 7, m_rawp4_otherMdcKaltrk);
@@ -170,6 +171,7 @@ void DDecay::clearVariables() {
     charge_otherMdctrk = 0;
     n_count = 0;
     m_n_count = 0;
+    m_matched_D = 0;
 
     // judgement variables
     stat_DTagTool = false;
@@ -350,6 +352,8 @@ bool DDecay::saveCandD(VWTrkPara &vwtrkpara_charge, VWTrkPara &vwtrkpara_photon)
         vwtrkpara_charge.clear();
         HepLorentzVector pK;
         HepLorentzVector ppi;
+        m_matched_D = 0;
+        int tag_K_Match = 1;
         DTagTool dtagTool;
         for (int j = 0; j < n_trkD; j++) {
             RecMdcKalTrack* KalTrk = Dtrks[j]->mdcKalTrack();
@@ -366,6 +370,8 @@ bool DDecay::saveCandD(VWTrkPara &vwtrkpara_charge, VWTrkPara &vwtrkpara_photon)
                 pK.setPy(KalTrk->p4(mass[3])[1]);
                 pK.setPz(KalTrk->p4(mass[3])[2]);
                 pK.setE(KalTrk->p4(mass[3])[3]);
+                m_matched_D = MatchMC(pK, "D_tag");
+                tag_K_Match = 0;
             }
             // to fill Pion candidates
             else {
@@ -379,6 +385,7 @@ bool DDecay::saveCandD(VWTrkPara &vwtrkpara_charge, VWTrkPara &vwtrkpara_photon)
                 ppi.setPy(KalTrk->p4(mass[2])[1]);
                 ppi.setPz(KalTrk->p4(mass[2])[2]);
                 ppi.setE(KalTrk->p4(mass[2])[3]);
+                if (m_matched_D || tag_K_Match == 1) m_matched_D = MatchMC(ppi, "D_tag");
             }
         }
 
@@ -533,6 +540,7 @@ bool DDecay::saveOthertrks(VWTrkPara &vwtrkpara_charge, VWTrkPara &vwtrkpara_pho
     DTagTool dtagTool;
     m_n_othertrks = 0;
     HepLorentzVector ppi_cand;
+    int matched_pi_cand = -999;
     // to find the good pions and kaons
     for (int i = 0; i < othertracks.size(); i++) {
         if (!(dtagTool.isGoodTrack(othertracks[i]))) continue;
@@ -554,6 +562,9 @@ bool DDecay::saveOthertrks(VWTrkPara &vwtrkpara_charge, VWTrkPara &vwtrkpara_pho
             charge_otherMdctrk = mdcTrk->charge();
             m_rawp4_otherMdcKaltrk[m_n_othertrks][4] = mdcKalTrk->charge();
             m_rawp4_otherMdcKaltrk[m_n_othertrks][5] = 2;
+            matched_pi_cand = -999;
+            matched_pi_cand = MatchMC(ppi_cand, "pi_solo");
+            m_rawp4_otherMdcKaltrk[m_n_othertrks][6] = matched_pi_cand;
         }
         if (dtagTool.isKaon(othertracks[i])) {
             RecMdcTrack *mdcTrk = othertracks[i]->mdcTrack();
@@ -624,6 +635,46 @@ bool DDecay::saveOthershws() {
     if (m_debug) std::cout << " recorded " << m_n_othershws << " other good showers " << std::endl;
     if (m_n_othershws >= 50) return false;
     else return true;
+}
+
+int DDecay::MatchMC(HepLorentzVector &p4, std::string MODE) {
+    SmartDataPtr<Event::McParticleCol> mcParticleCol(eventSvc(), "/Event/MC/McParticleCol");
+    if (!mcParticleCol) {
+        return -999;
+    } else {
+        Event::McParticleCol::iterator iter_mc = mcParticleCol->begin();
+        double clst_ang = 999.;
+        Event::McParticle* clst_particle;
+        for (; iter_mc != mcParticleCol->end(); iter_mc++) {
+            if (!(*iter_mc)->decayFromGenerator())  continue;
+            double pid_cand = (*iter_mc)->particleProperty();
+            if (!(pid_cand == 211 || pid_cand == -211 || pid_cand == 321 || pid_cand == -321)) continue;
+            double ang = p4.angle((*iter_mc)->initialFourMomentum());
+            if (clst_ang > ang) {
+                clst_ang = ang;
+                clst_particle = (*iter_mc);
+            }
+        }
+        if (clst_ang < 999) {
+            Event::McParticle mom = clst_particle->mother();
+            int pid_mom = mom.particleProperty();
+            Event::McParticle grandmom = mom.mother();
+            int pid_grandmom = grandmom.particleProperty();
+            if (MODE == "D_tag" && ((fabs(pid_mom) == 411 || (pid_mom == 310 && fabs(pid_grandmom) == 411)) || (pid_mom == 111 && fabs(pid_grandmom) == 411))) {
+                return 1;
+            } 
+            if (MODE == "D_tag" && !((fabs(pid_mom) == 411 || (pid_mom == 310 && fabs(pid_grandmom) == 411)) || (pid_mom == 111 && fabs(pid_grandmom) == 411))) {
+                return 0;
+            }
+            if (MODE == "pi_solo" && (pid_mom == 9020443 || pid_mom == 9030443 || pid_mom == 90022 || pid_mom == 80022 || fabs(pid_mom) == 10413 || (fabs(pid_mom) == 211 && fabs(pid_grandmom) == 211))) {
+                return 1;
+            } 
+            if (MODE == "pi_solo" && !(pid_mom == 9020443 || pid_mom == 9030443 || pid_mom == 90022 || pid_mom == 80022 || fabs(pid_mom) == 10413 || (fabs(pid_mom) == 211 && fabs(pid_grandmom) == 211))) {
+                return 0;
+            }
+        }
+    }
+    return 0;
 }
 
 void DDecay::recordVariables() {

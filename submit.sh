@@ -128,7 +128,6 @@ case $option in
            cd ../logfile
            chmod u+x Apply_Cuts_Data_703
            bash Apply_Cuts_Data_703
-           rm -r Apply_Cuts_Data_703
            cd /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST
 	       ;;
 
@@ -203,7 +202,6 @@ case $option in
            cd ../logfile
            chmod u+x Apply_Cuts_Data_705
            bash Apply_Cuts_Data_705
-           rm -r Apply_Cuts_Data_705
            cd /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST
 	       ;;
 

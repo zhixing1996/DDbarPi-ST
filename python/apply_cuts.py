@@ -33,7 +33,7 @@ DATE
     October 2019
 \n''')
 
-def save_before(file_in, file_out, ecms):
+def save(file_in, file_out, ecms):
     try:
         chain = TChain('save')
         chain.Add(file_in)
@@ -46,7 +46,8 @@ def save_before(file_in, file_out, ecms):
     width_up = 1.86965 + width(ecms)/2.
 
     cut_base = '(m_rawm_D > ' + str(width_low) + ' && m_rawm_D < ' + str(width_up) + ')'
-    cut = cut_base 
+    cut_Dst = '(rm_D > 2.03)'
+    cut = cut_base + ' && ' + cut_Dst
 
     t = chain.CopyTree(cut)
     t.SaveAs(file_out)

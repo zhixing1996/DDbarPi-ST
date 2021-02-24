@@ -140,12 +140,12 @@ for SAMPLE in ${SAMPLES[@]}; do
     rm -rf $JobText_SaveDir/fort.*
     rm -rf $JobText_SaveDir/phokhara*
     cd $JobText_SaveDir
-    cp -r $Script_Dir/jobOptions_sim_sig_D_D_PI_PHSP_tempE_705.sh jobOptions_sim_sig_D_D_PI_PHSP_${SAMPLE}_705.sh
-    cp -r $Script_Dir/jobOptions_rec_sig_D_D_PI_PHSP_tempE_705.sh jobOptions_rec_sig_D_D_PI_PHSP_${SAMPLE}_705.sh
+    cp -r $Script_Dir/jobOptions_sim_sig_D_D_PI_PHSP_tempE.sh jobOptions_sim_sig_D_D_PI_PHSP_${SAMPLE}.sh
+    cp -r $Script_Dir/jobOptions_rec_sig_D_D_PI_PHSP_tempE.sh jobOptions_rec_sig_D_D_PI_PHSP_${SAMPLE}.sh
     cp -r $Script_Dir/xs_user.dat .
     threshold=4.0205
-    sh jobOptions_sim_sig_D_D_PI_PHSP_${SAMPLE}_705.sh 0 19 $SAMPLE ${ECMS[$COUNT]} 5000 $threshold ${RUNNO_LOW[$COUNT]} ${RUNNO_UP[$COUNT]} ${BOSS}
-    sh jobOptions_rec_sig_D_D_PI_PHSP_${SAMPLE}_705.sh 0 19 $SAMPLE
+    sh jobOptions_sim_sig_D_D_PI_PHSP_${SAMPLE}.sh 0 19 $SAMPLE ${ECMS[$COUNT]} 5000 $threshold ${RUNNO_LOW[$COUNT]} ${RUNNO_UP[$COUNT]} ${BOSS}
+    sh jobOptions_rec_sig_D_D_PI_PHSP_${SAMPLE}.sh 0 19 $SAMPLE
     rm -rf /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/rtraw/DDPI/$SAMPLE/*.rtraw
     rm -rf /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/dst/DDPI/$SAMPLE/*.dst
     cp -rf /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/gen_script/gen_mc/subSimRec.sh ./

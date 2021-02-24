@@ -76,7 +76,7 @@ for SAMPLE in ${SAMPLES[@]}; do
     rm -rf mc_D_D_PI_PHSP_$SAMPLE*txt
     cp -rf $WORKAREA/python/make_mc.py ./
     cp -rf $WORKAREA/python/tools.py ./
-    ./make_mc.py /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/dst/mc/DDPI/$SAMPLE mc D_D_PI PHSP DDPI ${ECMS[$COUNT]} 2
+    ./make_mc.py /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/dst/mc/DDPI/$SAMPLE mc D_D_PI PHSP DDPI ${ECMS[$COUNT]} $SAMPLE 2
     cp -rf /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/gen_script/gen_mc/subAna.sh ./
     rm -rf *boss*
     rm -rf $WORKAREA/run/DDbarPi/rootfile/mc/DDPI/$SAMPLE/*root

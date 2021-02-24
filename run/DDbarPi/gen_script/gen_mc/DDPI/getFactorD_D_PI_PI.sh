@@ -1,8 +1,6 @@
-#/bin/bash
-
+#!/bin/sh
 BOSS=$1
-PATH=/besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/anaroot/data
-
+PATCH=$2
 if [ "$BOSS" = "703" ]; then
     SAMPLES=("4190"
     "4200"
@@ -24,9 +22,9 @@ if [ "$BOSS" = "703" ]; then
     "4575"
     "4600")
 fi
-
 if [ "$BOSS" = "705" ]; then
-    SAMPLES=("4290"
+    SAMPLES=(
+    "4290"
     "4315"
     "4340"
     "4380"
@@ -40,9 +38,13 @@ if [ "$BOSS" = "705" ]; then
     "4700")
 fi
 
-FILENAME="Apply_Cuts_Data_"$BOSS
-echo "#!/usr/bin/env bash" > $FILENAME
-echo "cd /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/python" >> $FILENAME 
 for SAMPLE in ${SAMPLES[@]}; do
-    echo "./apply_cuts.py $PATH/$SAMPLE/data_${SAMPLE}.root $PATH/$SAMPLE/data_${SAMPLE}_after.root $SAMPLE" >> $FILENAME
+    echo $SAMPLE" is done!"
+    FILEPATH=/besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/jobs_text/mc/DDPI/$SAMPLE/jobs.out
+    SCPTPATH=/besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/python
+    for f in `ls $FILEPATH/subSimRec_D_D_PI_*_1*` 
+    do
+        cd $SCPTPATH
+        python get_factor.py $f $SAMPLE DDPI $PATCH
+    done
 done

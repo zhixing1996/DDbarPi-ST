@@ -56,14 +56,14 @@ for SAMPLE in ${SAMPLES[@]}; do
     if [[ $SAMPLE == *$shortbar1* ]]; then
         dir=$(echo $SAMPLE | sed 's/-1//g')
         mkdir -p $dir
-        mv /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/rootfile/data/$SAMPLE/data_$SAMPLE\.root ./$dir
+        mv /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/rootfile/data/$SAMPLE/DDbarPi_data_$SAMPLE\.root ./$dir
     elif [[ $SAMPLE == *$shortbar2* ]]; then
         dir=$(echo $SAMPLE | sed 's/-2//g')
         mkdir -p $dir
-        mv /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/rootfile/data/$SAMPLE/data_$SAMPLE\.root ./$dir
+        mv /besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/rootfile/data/$SAMPLE/DDbarPi_data_$SAMPLE\.root ./$dir
         cd $dir
-        rm -rf data_$dir\.root
-        hadd data_$dir\.root data_$dir-1.root data_$dir-2.root
+        rm -rf DDbarPi_data_$dir\.root
+        hadd DDbarPi_data_$dir\.root DDbarPi_data_$dir-1.root DDbarPi_data_$dir-2.root
     else
         echo "No need to change for $SAMPLE"
     fi

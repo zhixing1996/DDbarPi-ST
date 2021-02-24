@@ -127,6 +127,7 @@ class DDecay : public Algorithm {
         NTuple::Item<double> m_chi2_vf;
         NTuple::Item<double> m_chi2_kf;
         NTuple::Item<int> m_n_count;
+        NTuple::Item<int> m_matched_D;
         NTuple::Item<int> m_n_othertrks;
         NTuple::Matrix<double> m_rawp4_otherMdctrk;
         NTuple::Matrix<double> m_rawp4_otherMdcKaltrk;
@@ -151,5 +152,6 @@ class DDecay : public Algorithm {
         double fitKM(VWTrkPara &vwtrkpara_charge, VWTrkPara &vwtrkpara_photon, VertexParameter &birth);
         bool saveOthertrks(VWTrkPara &vwtrkpara_charge, VWTrkPara &vwtrkpara_photon, VertexParameter &birth);
         bool saveOthershws();
+        int MatchMC(HepLorentzVector &p4, std::string MODE);
 };
 #endif

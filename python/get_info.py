@@ -51,6 +51,8 @@ def save_raw(f_in, cms, t):
     m_chi2_kf = array('d', [999.])
     m_n_othershws = array('i', [0])
     m_n_othertrks = array('i', [0])
+    m_matched_D = array('i', [0])
+    m_matched_pi = array('i', [0])
     m_indexmc = array('i', [0])
     m_motheridx = array('i', 100*[0])
     m_pdgid = array('i', 100*[0])
@@ -73,6 +75,8 @@ def save_raw(f_in, cms, t):
     t.Branch('chi2_kf', m_chi2_kf, 'm_chi2_kf/D')
     t.Branch('n_othertrks', m_n_othertrks, 'm_n_othertrks/I')
     t.Branch('n_othershws', m_n_othershws, 'm_n_othershws/I')
+    t.Branch('matched_D', m_matched_D, 'm_matched_D/I')
+    t.Branch('matched_pi', m_matched_pi, 'm_matched_pi/I')
     t.Branch('indexmc', m_indexmc, 'indexmc/I')
     t.Branch('motheridx', m_motheridx, 'motheridx[100]/I')
     t.Branch('pdgid', m_pdgid, 'pdgid[100]/I')
@@ -80,7 +84,7 @@ def save_raw(f_in, cms, t):
     nentries = t_std.GetEntries()
     for ientry in range(nentries):
         t_std.GetEntry(ientry)
-        if t_std.mode != 200 and t_std.mode != 0 and t_std.mode != 1 and t_std.mode != 3:
+        if t_std.mode != 200:
             continue
         pD_raw = TLorentzVector(0, 0, 0, 0)
         pD = TLorentzVector(0, 0, 0, 0)
@@ -100,18 +104,18 @@ def save_raw(f_in, cms, t):
             pD += pshower
         pPi = TLorentzVector(0,0,0,0)
         for trk in range(t_std.n_othertrks):
-            if abs(t_std.rawp4_otherMdcKaltrk[trk*6+4]) != 1:
+            if abs(t_std.rawp4_otherMdcKaltrk[trk*7+4]) != 1:
                 continue
-            if t_std.rawp4_otherMdcKaltrk[trk*6+5] != 2:
+            if t_std.rawp4_otherMdcKaltrk[trk*7+5] != 2:
                 continue
-            pPi.SetPxPyPzE(t_std.rawp4_otherMdcKaltrk[trk*6+0], t_std.rawp4_otherMdcKaltrk[trk*6+1], t_std.rawp4_otherMdcKaltrk[trk*6+2], t_std.rawp4_otherMdcKaltrk[trk*6+3])
+            pPi.SetPxPyPzE(t_std.rawp4_otherMdcKaltrk[trk*7+0], t_std.rawp4_otherMdcKaltrk[trk*7+1], t_std.rawp4_otherMdcKaltrk[trk*7+2], t_std.rawp4_otherMdcKaltrk[trk*7+3])
             if t_std.mode == 200:
-                if ((t_std.charm == 1 and t_std.rawp4_otherMdcKaltrk[trk*6+4] == -1) or (t_std.charm == -1 and t_std.rawp4_otherMdcKaltrk[trk*6+4] == 1)):
+                if ((t_std.charm == 1 and t_std.rawp4_otherMdcKaltrk[trk*7+4] == -1) or (t_std.charm == -1 and t_std.rawp4_otherMdcKaltrk[trk*7+4] == 1)):
                     m_runNo[0] = t_std.runNo
                     m_evtNo[0] = t_std.evtNo
                     m_mode[0] = t_std.mode
                     m_charm[0] = t_std.charm
-                    m_charge_pi[0] = t_std.rawp4_otherMdcKaltrk[trk*6+4]
+                    m_charge_pi[0] = t_std.rawp4_otherMdcKaltrk[trk*7+4]
                     m_rawm_D[0] = pD_raw.M()
                     m_m_D[0] = pD.M()
                     m_p_D[0] = pD.P()
@@ -124,6 +128,8 @@ def save_raw(f_in, cms, t):
                     m_rm_pi[0] = (cms-pPi).M()
                     m_chi2_vf[0] = t_std.chi2_vf
                     m_chi2_kf[0] = t_std.chi2_kf
+                    # m_matched_D[0] = t_std.matched_D
+                    m_matched_pi[0] = int(t_std.rawp4_otherMdcKaltrk[trk*7+6])
                     m_n_othershws[0] = t_std.n_othershws
                     m_n_othertrks[0] = t_std.n_othertrks
                     m_indexmc[0] = t_std.indexmc
@@ -134,13 +140,13 @@ def save_raw(f_in, cms, t):
 
 def main():
     args = sys.argv[1:]
-    if len(args)<3:
-        file_in = args[0]
-        file_out = args[1]
-        ecms = float(args[2])
-    else:
+    if len(args) < 2:
         return usage()
+    file_in = args[0]
+    file_out = args[1]
+    ecms = float(args[2])
 
+    print 'Begin to process file: ' + file_in + ' ...'
     f_in = TFile(file_in)
     f_out = TFile(file_out, 'recreate')
     t_out = TTree('save', 'save')
@@ -150,6 +156,7 @@ def main():
     f_out.cd()
     t_out.Write()
     f_out.Close()
+    print 'End of processing file: ' + file_out + ' ...'
 
 if __name__ == '__main__':
     main()

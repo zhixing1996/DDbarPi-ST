@@ -18,13 +18,14 @@ NAME
     make_mc.py 
 
 SYNOPSIS
-    ./make_mc.py [dst_path] [sample] [decay] [mode] [type] [ecms] [dst_num]
+    ./make_mc.py [dst_path] [sample] [decay] [mode] [type] [ecms] [SAMPLE] [dst_num]
     [dst_path]: dst file path
     [sample]: sigMC, incMC, data or others
     [decay]: decay chain, such as X_3842_PI_PI for e+e- -> X(3842)PI+PI-
     [mode]: generation mode
     [type]: X_3842, D1_2420, psi_3770 or others, for inclusive MC the same as mode
     [ecms]: energy point
+    [SAMPLE]: sample
     [dst_num]: number of dst files in one jobOption file
 
 AUTHOR 
@@ -37,7 +38,7 @@ DATE
     
 def main():
     args = sys.argv[1:]
-    if len(args) < 7:
+    if len(args) < 8:
         return usage()
     
     dst_path = args[0]
@@ -46,7 +47,8 @@ def main():
     mode = args[3]
     type = args[4]
     ecms = args[5]
-    dst_num = args[6]
+    SAMPLE = args[6]
+    dst_num = args[7]
     sys.stdout.write('Scanning %s...\n' %dst_path)
 
     dst_list = []
@@ -56,7 +58,7 @@ def main():
     dst_list_groups = group_files_by_num(dst_list, dst_num)
     i = 0
     for dst_list_fill in dst_list_groups:
-        file_name = sample + '_' + decay + '_' + mode + '_' + ecms + '_' + str(i) + '.txt'
+        file_name = sample + '_' + decay + '_' + mode + '_' + str(SAMPLE) + '_' + str(i) + '.txt'
         f = open(file_name, 'w')
         f.write('#include "$ROOTIOROOT/share/jobOptions_ReadRec.txt"\n')
         f.write('#include "$MAGNETICFIELDROOT/share/MagneticField.txt"\n')
@@ -83,7 +85,7 @@ def main():
         f.write('ApplicationMgr.EvtMax = -1;\n')
         f.write('\n')
         f.write('ApplicationMgr.HistogramPersistency = "ROOT";\n')
-        f.write('NTupleSvc.Output = {\"FILE1 DATAFILE=\'/besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/rootfile/'+sample+'/'+type+'/'+ecms+'/'+sample+'_'+decay+'_'+mode+'_'+ecms+'_'+str(i)+'.root'+'\' OPT=\'NEW\' TYP=\'ROOT\'\"};\n')
+        f.write('NTupleSvc.Output = {\"FILE1 DATAFILE=\'/besfs5/groups/cal/dedx/$USER/bes/DDbarPi-ST/run/DDbarPi/rootfile/'+sample+'/'+type+'/'+str(SAMPLE)+'/'+sample+'_'+decay+'_'+mode+'_'+str(SAMPLE)+'_'+str(i)+'.root'+'\' OPT=\'NEW\' TYP=\'ROOT\'\"};\n')
         f.close()
         i = i + 1
     print 'All done!'
